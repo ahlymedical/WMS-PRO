@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-dark-bg: #111827;
+  --color-dark-panel: #1f2937;
+}
+
+@layer base {
+  :root {
+    --toast-bg-success: #10b981;
+    --toast-bg-error: #ef4444;
+    --toast-bg-warning: #f59e0b;
+  }
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  @apply bg-gray-100 text-gray-800 dark:bg-dark-bg dark:text-gray-100 font-sans transition-colors duration-300;
+}
+
+/* Hide scrollbar for cleaner look but allow scrolling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
+}
+
+/* Glassmorphism */
+.glass {
+  @apply bg-white/70 dark:bg-gray-900/70 backdrop-blur-md border border-white/20 dark:border-gray-700/50 shadow-xl;
+}
+
+/* Custom animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out forwards;
+}
