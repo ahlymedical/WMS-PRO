@@ -5,10 +5,19 @@ import { BadgeDollarSign, ShieldAlert } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useI18n } from '../context/I18nContext';
 
+import { updateTenantPermissions } from '../hooks/useFirebase';
+import { Settings as SettingsIcon } from 'lucide-react';
+
 export const AdminSettings = () => {
   const { tenant, activeWorkspaceId } = useAuth();
   const { t } = useI18n();
+
   const [selectedCurrency, setSelectedCurrency] = useState(tenant?.currency || 'USD');
+
+  const [brandName, setBrandName] = useState(tenant?.businessDisplayName || tenant?.name || '');
+  const [supportPhone, setSupportPhone] = useState(tenant?.supportPhone || '');
+  const [supportEmail, setSupportEmail] = useState(tenant?.supportEmail || '');
+
   const [loading, setLoading] = useState(false);
 
   if (!tenant) return null;
@@ -37,6 +46,76 @@ export const AdminSettings = () => {
         <p className="text-gray-500 dark:text-gray-400 mt-1">{t('settings.desc')}</p>
       </div>
 
+      {/* Branding Settings (White-label) */}
+      <div className="bg-white dark:bg-dark-panel border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl shadow-gray-200/40 dark:shadow-none p-8">
+        <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
+          <div className="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 rounded-xl">
+            <SettingsIcon size={24} />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t('settings.branding.title')}</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">{t('settings.branding.desc')}</p>
+          </div>
+        </div>
+
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          setLoading(true);
+          try {
+            await updateTenantPermissions(activeWorkspaceId!, {
+              businessDisplayName: brandName,
+              supportPhone,
+              supportEmail
+            });
+            toast.success(t('msg.success'));
+          } catch (err: any) {
+            toast.error(t(err.message) || t('msg.fail'));
+          }
+          setLoading(false);
+        }} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{t('settings.branding.name')}</label>
+              <input
+                type="text"
+                value={brandName}
+                onChange={(e) => setBrandName(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-purple-500 outline-none transition-shadow"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{t('settings.branding.phone')}</label>
+              <input
+                type="text"
+                value={supportPhone}
+                onChange={(e) => setSupportPhone(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-purple-500 outline-none transition-shadow"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">{t('settings.branding.email')}</label>
+              <input
+                type="email"
+                value={supportEmail}
+                onChange={(e) => setSupportEmail(e.target.value)}
+                className="w-full px-4 py-3 bg-white dark:bg-dark-bg border border-gray-300 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-bold focus:ring-2 focus:ring-purple-500 outline-none transition-shadow"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4">
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-3 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white font-bold rounded-xl shadow-lg shadow-purple-500/30 transition-all"
+            >
+              {t('action.save')}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Currency Settings */}
       <div className="bg-white dark:bg-dark-panel border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl shadow-gray-200/40 dark:shadow-none p-8">
         <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100 dark:border-gray-800">
           <div className="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-xl">

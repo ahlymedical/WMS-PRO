@@ -8,23 +8,26 @@ export const useTenantData = (uid: string | null) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!uid) {
-      setTenant(null);
-      setLoading(false);
-      return;
+    let unsubscribe: () => void;
+
+    if (uid) {
+      const docRef = doc(db, 'tenants', uid);
+      unsubscribe = onSnapshot(docRef, (docSnap) => {
+        if (docSnap.exists()) {
+          setTenant({ id: docSnap.id, ...docSnap.data() } as Tenant);
+        } else {
+          setTenant(null);
+        }
+        setLoading(false);
+      });
+    } else {
+       setTenant(null);
+       setLoading(false);
     }
 
-    const docRef = doc(db, 'tenants', uid);
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setTenant({ id: docSnap.id, ...docSnap.data() } as Tenant);
-      } else {
-        setTenant(null);
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    return () => {
+        if (unsubscribe) unsubscribe();
+    };
   }, [uid]);
 
   return { tenant, loading };
@@ -99,10 +102,21 @@ export const approveCurrency = async (tenantId: string, newCurrency: string) => 
   }
 };
 
-export const archiveTenant = async (tenantId: string, tenantData: Tenant) => {
+export const archiveTenant = async (tenantId: string, tenantData: Tenant, reason: string) => {
+  if (!reason.trim()) throw new Error('Reason is required');
   try {
     const archiveRef = doc(db, 'deleted_users_archive', tenantId);
-    await setDoc(archiveRef, { ...tenantData, archivedAt: new Date() }, { merge: true });
+    await setDoc(archiveRef, { ...tenantData, archivedAt: new Date(), archiveReason: reason }, { merge: true });
+
+    const historyRef = doc(collection(db, 'deleted_users_history'));
+    await setDoc(historyRef, {
+      tenantId,
+      email: tenantData.email,
+      name: tenantData.name,
+      reason,
+      action: 'archived',
+      timestamp: new Date()
+    });
 
     const ref = doc(db, 'tenants', tenantId);
     await updateDoc(ref, { status: 'rejected' });
@@ -112,14 +126,31 @@ export const archiveTenant = async (tenantId: string, tenantData: Tenant) => {
   }
 };
 
-export const deleteTenantData = async (tenantId: string) => {
+export const deleteTenantData = async (tenantId: string, tenantData: Tenant, reason: string) => {
+  if (!reason.trim()) throw new Error('Reason is required');
   try {
+    const historyRef = doc(collection(db, 'deleted_users_history'));
+    await setDoc(historyRef, {
+      tenantId,
+      email: tenantData.email,
+      name: tenantData.name,
+      reason,
+      action: 'deleted',
+      timestamp: new Date()
+    });
+
     const ref = doc(db, 'tenants', tenantId);
     await deleteDoc(ref);
   } catch (err: any) {
     if (err.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('err.admin.deleteFail');
   }
+};
+
+export const checkDeletionHistory = async (email: string) => {
+  const q = query(collection(db, 'deleted_users_history'), where('email', '==', email));
+  const snapshot = await getDoc(doc(db, 'deleted_users_history', email)); // Note: Using collection query logic in components, keeping this simple.
+  return snapshot.exists();
 };
 
 export const updateTenantPermissions = async (tenantId: string, updates: Partial<Tenant>) => {

@@ -11,6 +11,7 @@ import { AdminSettings } from './views/AdminSettings';
 import { Inventory } from './views/Inventory';
 import { Scanner } from './views/Scanner';
 import { POS } from './views/POS';
+import { MarketIntelligence } from './views/MarketIntelligence';
 
 // Placeholder login
 const Login = () => <div className="p-10"><h1>Login View</h1></div>;
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="inventory" element={<Inventory />} />
               <Route path="scanner" element={<Scanner />} />
               <Route path="pos" element={<POS />} />
+              <Route path="market" element={<MarketIntelligence />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="*" element={<div className="p-10">Warehouse Feature placeholder</div>} />
             </Route>

@@ -11,16 +11,19 @@ import {
   UsersRound,
   BadgeDollarSign,
   LogOut,
-  Building2
+  Building2,
+  TrendingUp
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useI18n } from '../context/I18nContext';
 import { logout } from '../lib/firebase';
+import { AboutUsModal } from './AboutUsModal';
 import clsx from 'clsx';
 
 export const Sidebar = () => {
   const { isSuperAdmin, activeWorkspaceId, setActiveWorkspaceId, user } = useAuth();
   const { t, isRtl } = useI18n();
+  const [isAboutOpen, setIsAboutOpen] = React.useState(false);
 
   const isSuperAdminView = isSuperAdmin && activeWorkspaceId === 'super-admin';
 
@@ -38,11 +41,13 @@ export const Sidebar = () => {
           "text-2xl font-black flex items-center gap-3 tracking-tight",
           isSuperAdminView ? "text-white" : "text-primary dark:text-blue-400"
         )}>
-          {isSuperAdminView ? <ShieldAlert className="w-8 h-8 text-indigo-500" /> : <Building2 className="w-8 h-8" />}
-          {isSuperAdminView ? 'WIMS Nexus' : 'WIMS'}
+          {isSuperAdminView ? <ShieldAlert className="w-8 h-8 text-indigo-500" /> : (
+            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white text-sm">MP</div>
+          )}
+          {isSuperAdminView ? 'WIMS Nexus' : 'MalakPay PRO'}
         </h1>
         <p className="text-xs mt-1 font-medium opacity-70">
-          {isSuperAdminView ? 'Global Governance Center' : 'Warehouse & POS Platform'}
+          {isSuperAdminView ? 'Global Governance Center' : 'Enterprise WMS & POS'}
         </p>
       </div>
 
@@ -103,6 +108,7 @@ export const Sidebar = () => {
             <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.retail')}</p>
             <NavItem to="/app/pos" icon={<Calculator size={20}/>} label={t('nav.pos')} />
             <NavItem to="/app/reports" icon={<FileBarChart size={20}/>} label={t('nav.reports')} />
+            <NavItem to="/app/market" icon={<TrendingUp size={20}/>} label={t('nav.market')} />
 
             <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.config')}</p>
             <NavItem to="/app/settings" icon={<Settings size={20}/>} label={t('nav.settings')} />
@@ -111,7 +117,20 @@ export const Sidebar = () => {
       </nav>
 
       {/* Footer / Profile */}
-      <div className="p-4 border-t border-inherit">
+      <div className="p-4 border-t border-inherit space-y-2">
+        <button
+          onClick={() => setIsAboutOpen(true)}
+          className={clsx(
+            "w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all border",
+            isSuperAdminView
+              ? "border-slate-700 bg-slate-800/50 text-slate-300 hover:bg-slate-700 hover:text-white"
+              : "border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-slate-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700"
+          )}
+        >
+          <Building2 size={18} />
+          {t('brand.about')}
+        </button>
+
         <button
           onClick={() => logout()}
           className={clsx(
@@ -125,6 +144,8 @@ export const Sidebar = () => {
           {t('nav.signout')}
         </button>
       </div>
+
+      <AboutUsModal isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
     </aside>
   );
 };

@@ -32,9 +32,10 @@ export const SuperAdminDashboard = () => {
   };
 
   const handleArchive = async (tenant: Tenant) => {
-    if (confirm("هل أنت متأكد من أرشفة هذا الحساب؟")) {
+    const reason = prompt("Enter mandatory archive reason / أدخل سبب الأرشفة الإلزامي:");
+    if (reason) {
       try {
-        await archiveTenant(tenant.id, tenant);
+        await archiveTenant(tenant.id, tenant, reason);
         toast.success(t('msg.success'));
       } catch (e: any) {
         toast.error(t(e.message) || t('msg.fail'));
@@ -42,10 +43,11 @@ export const SuperAdminDashboard = () => {
     }
   };
 
-  const handleDelete = async (tenantId: string) => {
-    if (confirm("تحذير: سيتم حذف بيانات هذا المستأجر نهائياً. متابعة؟")) {
+  const handleDelete = async (tenant: Tenant) => {
+    const reason = prompt("تحذير: سيتم حذف البيانات نهائياً. أدخل سبب الحذف الإلزامي / Enter mandatory deletion reason:");
+    if (reason) {
       try {
-        await deleteTenantData(tenantId);
+        await deleteTenantData(tenant.id, tenant, reason);
         toast.success(t('msg.success'));
       } catch (e: any) {
         toast.error(t(e.message) || t('msg.fail'));
@@ -189,7 +191,7 @@ export const SuperAdminDashboard = () => {
                       <Archive size={16} />
                     </button>
                     <button
-                      onClick={() => handleDelete(tenant.id)}
+                      onClick={() => handleDelete(tenant)}
                       className="p-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg transition-colors"
                       title="Delete"
                     >

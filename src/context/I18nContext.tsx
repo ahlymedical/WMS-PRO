@@ -22,6 +22,7 @@ const translations = {
     'nav.scanner': 'Smart Scanner',
     'nav.pos': 'Cashier POS',
     'nav.reports': 'Reports & BI',
+    'nav.market': 'Market Intelligence',
     'nav.settings': 'Settings',
     'nav.signout': 'Sign Out',
     'nav.workspace': 'Workspace',
@@ -101,9 +102,21 @@ const translations = {
     'msg.success': 'Operation completed successfully.',
     'msg.fail': 'Failed to execute operation.',
 
+    // Brand & About
+    'brand.about': 'About Us',
+    'brand.developer': 'Developer Credit',
+    'brand.devName': 'Abanoub Lotfy Nakhil',
+    'brand.contact': 'Official Contact',
+    'brand.phone': 'Phone: 01000980037',
+
     // Settings
     'settings.title': 'Workspace Settings',
     'settings.desc': 'Configure your business rules and local preferences.',
+    'settings.branding.title': 'Business Identity (White-label)',
+    'settings.branding.desc': 'Customize how your business appears to your customers.',
+    'settings.branding.name': 'Workspace Display Name',
+    'settings.branding.phone': 'Support Phone',
+    'settings.branding.email': 'Support Email',
     'settings.currency.title': 'Operating Currency',
     'settings.currency.desc': 'Request a change to your primary business currency.',
     'settings.currency.current': 'Current Active Currency',
@@ -141,6 +154,7 @@ const translations = {
     'nav.scanner': 'الماسح الذكي',
     'nav.pos': 'نقطة البيع (الكاشير)',
     'nav.reports': 'التقارير والإحصائيات',
+    'nav.market': 'تحليل السوق',
     'nav.settings': 'الإعدادات',
     'nav.signout': 'تسجيل الخروج',
     'nav.workspace': 'مساحة العمل',
@@ -220,9 +234,21 @@ const translations = {
     'msg.success': 'تم تنفيذ العملية بنجاح.',
     'msg.fail': 'تعذر تنفيذ العملية.',
 
+    // Brand & About
+    'brand.about': 'معلومات عنا',
+    'brand.developer': 'المطور',
+    'brand.devName': 'أبانوب لطفي نخيل',
+    'brand.contact': 'التواصل الرسمي',
+    'brand.phone': 'هاتف: 01000980037',
+
     // Settings
     'settings.title': 'إعدادات مساحة العمل',
     'settings.desc': 'قم بتكوين قواعد عملك وتفضيلاتك المحلية.',
+    'settings.branding.title': 'هوية العمل (العلامة البيضاء)',
+    'settings.branding.desc': 'تخصيص كيفية ظهور عملك لعملائك.',
+    'settings.branding.name': 'اسم مساحة العمل',
+    'settings.branding.phone': 'هاتف الدعم',
+    'settings.branding.email': 'البريد الإلكتروني للدعم',
     'settings.currency.title': 'عملة التشغيل',
     'settings.currency.desc': 'اطلب تغييراً لعملة عملك الأساسية.',
     'settings.currency.current': 'العملة النشطة الحالية',

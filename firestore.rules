@@ -12,23 +12,25 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == tenantId;
     }
 
-    // 1. Tenants Collection Rules
     match /tenants/{tenantId} {
-      // Super Admin can do everything. Tenant owner can read their own doc, and update specific fields (like pendingCurrency).
       allow read: if isSuperAdmin() || isTenantOwner(tenantId);
       allow create: if isSuperAdmin() || isTenantOwner(tenantId);
       allow update: if isSuperAdmin() || isTenantOwner(tenantId);
-      allow delete: if isSuperAdmin(); // Only Super Admin can delete a tenant.
-
-      // 2. Nested Collections (inventory, sales, transactions, etc.)
-      match /{subcollection}/{docId} {
-        // Super Admin can access all nested data across all tenants
-        // Tenant owners can read/write everything inside their own workspace
-        allow read, write: if isSuperAdmin() || isTenantOwner(tenantId);
-      }
+      allow delete: if isSuperAdmin();
     }
 
-    // Fallback: Super Admin can read/write to any collection globally
+    // Allow tenant owners to read/write their own inventory
+    match /inventory/{docId} {
+      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
+      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+    }
+
+    // Allow tenant owners to read/write their own sales
+    match /sales/{docId} {
+      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
+      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+    }
+
     match /{document=**} {
       allow read, write: if isSuperAdmin();
     }

@@ -5,6 +5,12 @@ export interface Tenant {
   currency: string;
   pendingCurrency?: string;
   status: 'pending' | 'approved' | 'rejected';
+
+  // White-labeling / Business Settings
+  businessDisplayName?: string;
+  supportPhone?: string;
+  supportEmail?: string;
+
   createdAt: any;
   updatedAt: any;
 }
