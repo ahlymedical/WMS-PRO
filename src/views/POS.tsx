@@ -6,6 +6,8 @@ import { Search, ShoppingCart, Minus, Plus, Trash2, CheckCircle2 } from 'lucide-
 import { db } from '../lib/firebase';
 import { collection, doc, writeBatch, serverTimestamp } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { useI18n } from '../context/I18nContext';
+import clsx from 'clsx';
 
 interface CartItem {
   id: string; // Inventory ID
@@ -19,6 +21,7 @@ interface CartItem {
 export const POS = () => {
   const { tenant, activeWorkspaceId } = useAuth();
   const { inventory } = useInventory(activeWorkspaceId!);
+  const { t, isRtl } = useI18n();
 
   const [search, setSearch] = useState('');
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -33,7 +36,7 @@ export const POS = () => {
 
       if (match) {
         if (match.stock <= 0) {
-          toast.error("Item is out of stock!");
+          toast.error(t('pos.outOfStock'));
           return;
         }
 
@@ -41,7 +44,7 @@ export const POS = () => {
           const existing = prev.find(p => p.id === match.id);
           if (existing) {
             if (existing.qty >= match.stock) {
-              toast.error("Not enough stock available");
+              toast.error(t('pos.notEnoughStock'));
               return prev;
             }
             return prev.map(p => p.id === match.id ? { ...p, qty: p.qty + 1 } : p);
@@ -50,7 +53,7 @@ export const POS = () => {
         });
         setSearch('');
       } else {
-        toast.error("Item not found");
+        toast.error(t('pos.notFound'));
       }
     }
   };
@@ -60,7 +63,7 @@ export const POS = () => {
       if (item.id === id) {
         const newQty = item.qty + delta;
         if (newQty > item.stock) {
-          toast.error("Cannot exceed available stock");
+          toast.error(t('pos.cannotExceed'));
           return item;
         }
         return newQty > 0 ? { ...item, qty: newQty } : item;
@@ -112,40 +115,39 @@ export const POS = () => {
 
       await batch.commit();
 
-      toast.success("Checkout successful!");
+      toast.success(t('pos.success'));
       setCart([]);
     } catch (e) {
-      toast.error("Checkout failed");
+      toast.error(t('pos.fail'));
     } finally {
       setIsProcessing(false);
     }
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-6 h-full pb-8">
+    <div className={clsx("flex flex-col gap-6 h-full pb-8", isRtl ? "md:flex-row-reverse" : "md:flex-row")}>
 
       {/* Left Area: Search & Quick Add */}
       <div className="flex-[2] flex flex-col space-y-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Point of Sale</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Scan or search to ring up items instantly.</p>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{t('nav.pos')}</h1>
         </div>
 
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
+          <Search className={clsx("absolute top-1/2 -translate-y-1/2 text-gray-400", isRtl ? "right-4" : "left-4")} size={24} />
           <input
             type="text"
-            placeholder="Scan barcode or type item name and press Enter..."
+            placeholder={t('action.search')}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={handleSearchAndAdd}
-            className="w-full pl-14 pr-6 py-4 bg-white dark:bg-dark-panel border-2 border-gray-200 dark:border-gray-800 rounded-2xl text-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold"
+            className={clsx("w-full py-4 bg-white dark:bg-dark-panel border-2 border-gray-200 dark:border-gray-800 rounded-2xl text-lg shadow-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all font-semibold", isRtl ? "pr-14 pl-6" : "pl-14 pr-6")}
             autoFocus
           />
         </div>
 
         <div className="flex-1 bg-white dark:bg-dark-panel border border-gray-100 dark:border-gray-800 rounded-2xl p-6 shadow-xl shadow-gray-200/40 dark:shadow-none overflow-y-auto">
-           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Quick Add Catalog</h3>
+           <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">{t('pos.quickAdd')}</h3>
            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
              {inventory.slice(0, 12).map(item => (
                <button
@@ -168,9 +170,8 @@ export const POS = () => {
 
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center gap-3 bg-gray-50/50 dark:bg-slate-900/20">
           <ShoppingCart className="text-blue-600" />
-          <h2 className="text-xl font-black text-gray-900 dark:text-white">Current Cart</h2>
-          <span className="ml-auto bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-bold">
-            {cart.length} items
+          <span className={clsx(isRtl ? "mr-auto" : "ml-auto", "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400 px-3 py-1 rounded-full text-sm font-bold")}>
+            {cart.length}
           </span>
         </div>
 
@@ -178,7 +179,6 @@ export const POS = () => {
           {cart.length === 0 ? (
             <div className="h-full flex flex-col items-center justify-center text-gray-400 opacity-60">
               <ShoppingCart size={48} className="mb-4" />
-              <p className="font-medium">Cart is empty</p>
             </div>
           ) : (
             cart.map(item => (
@@ -213,15 +213,15 @@ export const POS = () => {
         <div className="p-6 bg-gray-50/80 dark:bg-slate-900/50 border-t border-gray-100 dark:border-gray-800">
           <div className="space-y-3 mb-6">
             <div className="flex justify-between text-sm font-semibold text-gray-500">
-              <span>Subtotal</span>
+              <span>{t('pos.subtotal')}</span>
               <span>{formatMoney(subtotal, tenant.currency)}</span>
             </div>
             <div className="flex justify-between text-sm font-semibold text-gray-500">
-              <span>Tax (10%)</span>
+              <span>{t('pos.tax')}</span>
               <span>{formatMoney(tax, tenant.currency)}</span>
             </div>
             <div className="pt-3 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
-              <span className="text-gray-900 dark:text-white font-black text-lg">Total</span>
+              <span className="text-gray-900 dark:text-white font-black text-lg">{t('pos.total')}</span>
               <span className="text-blue-600 dark:text-blue-400 font-black text-3xl">{formatMoney(total, tenant.currency)}</span>
             </div>
           </div>
@@ -231,7 +231,7 @@ export const POS = () => {
             disabled={cart.length === 0 || isProcessing}
             className="w-full flex items-center justify-center gap-3 py-4 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:hover:bg-emerald-600 text-white font-black text-lg rounded-xl shadow-xl shadow-emerald-500/30 transition-all"
           >
-            <CheckCircle2 /> {isProcessing ? 'Processing...' : 'Complete Checkout'}
+            <CheckCircle2 /> {isProcessing ? t('pos.processing') : t('pos.checkout')}
           </button>
         </div>
 

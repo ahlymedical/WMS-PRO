@@ -5,10 +5,13 @@ import { PackagePlus, Search, Pencil, Trash2, ArrowUpDown, PackageSearch } from 
 import { db } from '../lib/firebase';
 import { doc, deleteDoc } from 'firebase/firestore';
 import toast from 'react-hot-toast';
+import { useI18n } from '../context/I18nContext';
+import clsx from 'clsx';
 
 export const Inventory = () => {
   const { activeWorkspaceId, tenant } = useAuth();
   const { inventory } = useInventory(activeWorkspaceId!);
+  const { t, isRtl } = useI18n();
   const [search, setSearch] = useState('');
 
   const filteredItems = inventory.filter(i =>
@@ -17,12 +20,12 @@ export const Inventory = () => {
   );
 
   const handleDelete = async (id: string) => {
-    if (confirm("Delete this item permanently?")) {
+    if (confirm(t('inventory.confirmDelete'))) {
       try {
         await deleteDoc(doc(db, 'inventory', id));
-        toast.success("Item deleted");
+        toast.success(t('inventory.deleteSuccess'));
       } catch (e) {
-        toast.error("Failed to delete item");
+        toast.error(t('inventory.deleteFail'));
       }
     }
   };
@@ -32,12 +35,10 @@ export const Inventory = () => {
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">Inventory Management</h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-1">Manage stock, prices, and alerts for your warehouse.</p>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{t('nav.inventory')}</h1>
         </div>
-
         <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2">
-          <PackagePlus size={20} /> Add New Item
+          <PackagePlus size={20} /> {t('inventory.add')}
         </button>
       </div>
 
@@ -46,18 +47,15 @@ export const Inventory = () => {
         {/* Toolbar */}
         <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search className={clsx("absolute top-1/2 -translate-y-1/2 text-gray-400", isRtl ? "right-3" : "left-3")} size={18} />
             <input
               type="text"
-              placeholder="Search by name or barcode..."
+              placeholder={t('action.search')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className={clsx("w-full py-2.5 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500", isRtl ? "pr-10 pl-4" : "pl-10 pr-4")}
             />
           </div>
-          <button className="flex items-center gap-2 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors">
-            <ArrowUpDown size={16} /> Sort
-          </button>
         </div>
 
         {/* Table */}
@@ -65,12 +63,12 @@ export const Inventory = () => {
           <table className="w-full text-left border-collapse">
             <thead className="bg-gray-50 dark:bg-slate-900/50 text-gray-500 dark:text-gray-400 text-xs uppercase tracking-wider font-semibold">
               <tr>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">Item Name</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">Barcode</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">Stock</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">Min Alert</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">Status</th>
-                <th className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 text-right">Actions</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl && "text-right")}>{t('inventory.table.name')}</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl && "text-right")}>{t('inventory.table.barcode')}</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl && "text-right")}>{t('inventory.table.stock')}</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl && "text-right")}>{t('inventory.table.alert')}</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl && "text-right")}>{t('inventory.table.status')}</th>
+                <th className={clsx("px-6 py-4 border-b border-gray-100 dark:border-gray-800", isRtl ? "text-left" : "text-right")}>{t('inventory.table.actions')}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100 dark:divide-gray-800/50">
@@ -78,7 +76,7 @@ export const Inventory = () => {
                 <tr>
                   <td colSpan={6} className="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
                     <PackageSearch className="mx-auto mb-3 opacity-20" size={48} />
-                    No items found matching your search.
+                    {t('inventory.empty')}
                   </td>
                 </tr>
               ) : (
@@ -102,15 +100,15 @@ export const Inventory = () => {
                       <td className="px-6 py-4">
                         {isLowStock ? (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-rose-100 text-rose-800 dark:bg-rose-900/30 dark:text-rose-400 border border-rose-200 dark:border-rose-800/50">
-                            Low Stock
+                            {t('inventory.lowStock')}
                           </span>
                         ) : (
                           <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800/50">
-                            Healthy
+                            {t('inventory.healthy')}
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right space-x-2">
+                      <td className={clsx("px-6 py-4 space-x-2", isRtl ? "text-left space-x-reverse" : "text-right")}>
                         <button className="p-2 text-gray-400 hover:text-blue-600 bg-gray-50 hover:bg-blue-50 dark:bg-gray-800 dark:hover:bg-blue-900/30 rounded-lg transition-colors">
                           <Pencil size={16} />
                         </button>

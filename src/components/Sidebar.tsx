@@ -14,11 +14,13 @@ import {
   Building2
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useI18n } from '../context/I18nContext';
 import { logout } from '../lib/firebase';
 import clsx from 'clsx';
 
 export const Sidebar = () => {
   const { isSuperAdmin, activeWorkspaceId, setActiveWorkspaceId, user } = useAuth();
+  const { t, isRtl } = useI18n();
 
   const isSuperAdminView = isSuperAdmin && activeWorkspaceId === 'super-admin';
 
@@ -47,7 +49,7 @@ export const Sidebar = () => {
       {/* Workspace Switcher for Super Admin */}
       {isSuperAdmin && (
         <div className="p-4 border-b border-inherit bg-black/5 dark:bg-black/20">
-          <p className="text-xs font-semibold mb-2 uppercase tracking-wider opacity-60">Active Workspace</p>
+          <p className={clsx("text-xs font-semibold mb-2 uppercase tracking-wider opacity-60", isRtl ? "mr-1" : "ml-1")}>{t('nav.workspace')}</p>
           <div className="flex bg-slate-200 dark:bg-slate-800 rounded-lg p-1">
             <button
               onClick={() => setActiveWorkspaceId('super-admin')}
@@ -56,7 +58,7 @@ export const Sidebar = () => {
                 isSuperAdminView ? "bg-white dark:bg-slate-700 shadow-sm text-indigo-600 dark:text-indigo-400" : "hover:bg-slate-300 dark:hover:bg-slate-700/50"
               )}
             >
-              Command
+              {t('switch.command')}
             </button>
             <button
               onClick={() => setActiveWorkspaceId(user!.uid)}
@@ -65,7 +67,7 @@ export const Sidebar = () => {
                 !isSuperAdminView ? "bg-white dark:bg-slate-700 shadow-sm text-blue-600 dark:text-blue-400" : "hover:bg-slate-300 dark:hover:bg-slate-700/50"
               )}
             >
-              Private HQ
+              {t('switch.private')}
             </button>
           </div>
         </div>
@@ -79,31 +81,31 @@ export const Sidebar = () => {
              SUPER ADMIN NAVIGATION (Nexus)
              ========================================== */
           <>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 ml-2 mt-2">Oversight</p>
-            <NavItem to="/admin" icon={<LayoutDashboard size={20}/>} label="Nexus Overview" isDark={true} />
-            <NavItem to="/admin/tenants" icon={<UsersRound size={20}/>} label="Tenants & Accounts" isDark={true} />
-            <NavItem to="/admin/currency" icon={<BadgeDollarSign size={20}/>} label="Currency Requests" isDark={true} />
+            <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 mt-2", isRtl ? "mr-2" : "ml-2")}>{t('nav.oversight')}</p>
+            <NavItem to="/admin" icon={<LayoutDashboard size={20}/>} label={t('nav.nexus')} isDark={true} />
+            <NavItem to="/admin/tenants" icon={<UsersRound size={20}/>} label={t('nav.tenants')} isDark={true} />
+            <NavItem to="/admin/currency" icon={<BadgeDollarSign size={20}/>} label={t('nav.currency')} isDark={true} />
 
-            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 ml-2 mt-6">System</p>
-            <NavItem to="/admin/audit" icon={<FileBarChart size={20}/>} label="Audit Logs" isDark={true} />
-            <NavItem to="/admin/security" icon={<ShieldAlert size={20}/>} label="Security Engine" isDark={true} />
+            <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.system')}</p>
+            <NavItem to="/admin/audit" icon={<FileBarChart size={20}/>} label={t('nav.audit')} isDark={true} />
+            <NavItem to="/admin/security" icon={<ShieldAlert size={20}/>} label={t('nav.security')} isDark={true} />
           </>
         ) : (
           /* ==========================================
              TENANT / PRIVATE WAREHOUSE NAVIGATION
              ========================================== */
           <>
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-2 mt-2">Workspace</p>
-            <NavItem to="/app" icon={<LayoutDashboard size={20}/>} label="Dashboard" end />
-            <NavItem to="/app/inventory" icon={<PackageSearch size={20}/>} label="Inventory" />
-            <NavItem to="/app/scanner" icon={<ScanBarcode size={20}/>} label="Smart Scanner" />
+            <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-2", isRtl ? "mr-2" : "ml-2")}>{t('nav.workspace')}</p>
+            <NavItem to="/app" icon={<LayoutDashboard size={20}/>} label={t('nav.dashboard')} end />
+            <NavItem to="/app/inventory" icon={<PackageSearch size={20}/>} label={t('nav.inventory')} />
+            <NavItem to="/app/scanner" icon={<ScanBarcode size={20}/>} label={t('nav.scanner')} />
 
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-2 mt-6">Retail & Finance</p>
-            <NavItem to="/app/pos" icon={<Calculator size={20}/>} label="Cashier POS" />
-            <NavItem to="/app/reports" icon={<FileBarChart size={20}/>} label="Reports & BI" />
+            <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.retail')}</p>
+            <NavItem to="/app/pos" icon={<Calculator size={20}/>} label={t('nav.pos')} />
+            <NavItem to="/app/reports" icon={<FileBarChart size={20}/>} label={t('nav.reports')} />
 
-            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 ml-2 mt-6">Configuration</p>
-            <NavItem to="/app/settings" icon={<Settings size={20}/>} label="Settings" />
+            <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.config')}</p>
+            <NavItem to="/app/settings" icon={<Settings size={20}/>} label={t('nav.settings')} />
           </>
         )}
       </nav>
@@ -119,8 +121,8 @@ export const Sidebar = () => {
               : "text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/10"
           )}
         >
-          <LogOut size={20} />
-          Sign Out
+          <LogOut size={20} className={isRtl ? "rotate-180" : ""} />
+          {t('nav.signout')}
         </button>
       </div>
     </aside>

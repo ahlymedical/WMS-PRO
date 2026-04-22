@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { I18nProvider } from './context/I18nContext';
 import { MainLayout } from './MainLayout';
 import { Toaster } from 'react-hot-toast';
 
@@ -16,8 +17,9 @@ const Login = () => <div className="p-10"><h1>Login View</h1></div>;
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
+    <I18nProvider>
+      <AuthProvider>
+        <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
 
@@ -40,9 +42,10 @@ export default function App() {
               <Route path="*" element={<div className="p-10">Nexus Feature placeholder</div>} />
             </Route>
           </Route>
-        </Routes>
-      </BrowserRouter>
-      <Toaster position="bottom-right" />
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+        <Toaster position="bottom-right" />
+      </AuthProvider>
+    </I18nProvider>
   );
 }
