@@ -66,7 +66,11 @@ export const useSales = (tenantId: string | undefined) => {
       const txs: SaleTransaction[] = [];
       snapshot.forEach((doc) => txs.push({ id: doc.id, ...doc.data() } as SaleTransaction));
       // Sort by timestamp desc locally for now
-      txs.sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis());
+      txs.sort((a, b) => {
+        const timeA = a.timestamp && 'toMillis' in a.timestamp ? a.timestamp.toMillis() : 0;
+        const timeB = b.timestamp && 'toMillis' in b.timestamp ? b.timestamp.toMillis() : 0;
+        return timeB - timeA;
+      });
       setSales(txs);
       setLoading(false);
     });
@@ -83,8 +87,9 @@ export const updateCurrencyRequest = async (tenantId: string, newCurrency: strin
     await updateDoc(ref, {
       pendingCurrency: newCurrency
     });
-  } catch (err: any) {
-    if (err.code === 'permission-denied') throw new Error('err.permission');
+  } catch (err: unknown) {
+    const error = err as { code?: string };
+    if (error.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('msg.fail');
   }
 };
@@ -96,8 +101,9 @@ export const approveCurrency = async (tenantId: string, newCurrency: string) => 
       currency: newCurrency,
       pendingCurrency: null
     });
-  } catch (err: any) {
-    if (err.code === 'permission-denied') throw new Error('err.permission');
+  } catch (err: unknown) {
+    const error = err as { code?: string };
+    if (error.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('msg.fail');
   }
 };
@@ -120,8 +126,9 @@ export const archiveTenant = async (tenantId: string, tenantData: Tenant, reason
 
     const ref = doc(db, 'tenants', tenantId);
     await updateDoc(ref, { status: 'rejected' });
-  } catch (err: any) {
-    if (err.code === 'permission-denied') throw new Error('err.permission');
+  } catch (err: unknown) {
+    const error = err as { code?: string };
+    if (error.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('err.admin.deleteFail');
   }
 };
@@ -141,8 +148,9 @@ export const deleteTenantData = async (tenantId: string, tenantData: Tenant, rea
 
     const ref = doc(db, 'tenants', tenantId);
     await deleteDoc(ref);
-  } catch (err: any) {
-    if (err.code === 'permission-denied') throw new Error('err.permission');
+  } catch (err: unknown) {
+    const error = err as { code?: string };
+    if (error.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('err.admin.deleteFail');
   }
 };
@@ -157,8 +165,9 @@ export const updateTenantPermissions = async (tenantId: string, updates: Partial
   try {
     const ref = doc(db, 'tenants', tenantId);
     await updateDoc(ref, updates);
-  } catch (err: any) {
-    if (err.code === 'permission-denied') throw new Error('err.permission');
+  } catch (err: unknown) {
+    const error = err as { code?: string };
+    if (error.code === 'permission-denied') throw new Error('err.permission');
     throw new Error('msg.fail');
   }
 };

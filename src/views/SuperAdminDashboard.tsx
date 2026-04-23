@@ -26,8 +26,9 @@ export const SuperAdminDashboard = () => {
     try {
       await approveCurrency(tenantId, newCurrency);
       toast.success(t('msg.success'));
-    } catch (e: any) {
-      toast.error(t(e.message) || t('msg.fail'));
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'msg.fail';
+      toast.error(t(message) || t('msg.fail'));
     }
   };
 
@@ -37,8 +38,9 @@ export const SuperAdminDashboard = () => {
       try {
         await archiveTenant(tenant.id, tenant, reason);
         toast.success(t('msg.success'));
-      } catch (e: any) {
-        toast.error(t(e.message) || t('msg.fail'));
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'msg.fail';
+        toast.error(t(message) || t('msg.fail'));
       }
     }
   };
@@ -49,8 +51,9 @@ export const SuperAdminDashboard = () => {
       try {
         await deleteTenantData(tenant.id, tenant, reason);
         toast.success(t('msg.success'));
-      } catch (e: any) {
-        toast.error(t(e.message) || t('msg.fail'));
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : 'msg.fail';
+        toast.error(t(message) || t('msg.fail'));
       }
     }
   };

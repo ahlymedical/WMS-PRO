@@ -1,3 +1,5 @@
+import { Timestamp, FieldValue } from 'firebase/firestore';
+
 export interface Tenant {
   id: string;
   email: string;
@@ -11,8 +13,8 @@ export interface Tenant {
   supportPhone?: string;
   supportEmail?: string;
 
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Timestamp | FieldValue | Date;
+  updatedAt: Timestamp | FieldValue | Date;
 }
 
 export interface InventoryItem {
@@ -43,7 +45,7 @@ export interface SaleTransaction {
   discount: number;
   total: number;
   currency: string; // Stamped currency at time of sale
-  timestamp: any;
+  timestamp: Timestamp | FieldValue | Date;
 }
 
 export interface StockTransaction {
@@ -53,5 +55,5 @@ export interface StockTransaction {
   name: string;
   type: 'in' | 'out';
   quantity: number;
-  timestamp: any;
+  timestamp: Timestamp | FieldValue | Date;
 }
