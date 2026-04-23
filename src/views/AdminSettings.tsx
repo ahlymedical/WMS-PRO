@@ -68,8 +68,9 @@ export const AdminSettings = () => {
               supportEmail
             });
             toast.success(t('msg.success'));
-          } catch (err: any) {
-            toast.error(t(err.message) || t('msg.fail'));
+          } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : 'msg.fail';
+            toast.error(t(message) || t('msg.fail'));
           }
           setLoading(false);
         }} className="space-y-6">
