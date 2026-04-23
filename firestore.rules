@@ -31,6 +31,16 @@ service cloud.firestore {
       allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
     }
 
+    match /stock_transactions/{docId} {
+      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
+      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+    }
+
+    match /backups/{docId} {
+      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
+      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+    }
+
     match /{document=**} {
       allow read, write: if isSuperAdmin();
     }

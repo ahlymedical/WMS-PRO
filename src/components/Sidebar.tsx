@@ -112,6 +112,7 @@ export const Sidebar = () => {
 
             <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.config')}</p>
             <NavItem to="/app/settings" icon={<Settings size={20}/>} label={t('nav.settings')} />
+            <NavItem to="/app/backups" icon={<ShieldAlert size={20}/>} label={t('nav.backups')} />
           </>
         )}
       </nav>

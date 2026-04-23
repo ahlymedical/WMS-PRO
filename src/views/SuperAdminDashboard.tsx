@@ -8,8 +8,12 @@ import { useI18n } from '../context/I18nContext';
 import { approveCurrency, archiveTenant, deleteTenantData } from '../hooks/useFirebase';
 import clsx from 'clsx';
 
+import { DeletedUserHistory } from '../types';
+import { AlertTriangle, Clock } from 'lucide-react';
+
 export const SuperAdminDashboard = () => {
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [history, setHistory] = useState<DeletedUserHistory[]>([]);
   const { t, isRtl } = useI18n();
 
   useEffect(() => {
@@ -19,7 +23,19 @@ export const SuperAdminDashboard = () => {
       snapshot.forEach(doc => t.push({ id: doc.id, ...doc.data() } as Tenant));
       setTenants(t);
     });
-    return () => unsubscribe();
+
+    const hQ = query(collection(db, 'deleted_users_history'));
+    const hUnsub = onSnapshot(hQ, (snapshot) => {
+      const h: DeletedUserHistory[] = [];
+      snapshot.forEach(doc => h.push({ id: doc.id, ...doc.data() } as DeletedUserHistory));
+      h.sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis());
+      setHistory(h);
+    });
+
+    return () => {
+      unsubscribe();
+      hUnsub();
+    };
   }, []);
 
   const handleApproveCurrency = async (tenantId: string, newCurrency: string) => {
@@ -166,10 +182,19 @@ export const SuperAdminDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/50">
-              {tenants.map(tenant => (
+              {tenants.map(tenant => {
+                const isPreviouslyArchived = history.some(h => h.email === tenant.email);
+                return (
                 <tr key={tenant.id} className="hover:bg-slate-800/20 transition-colors">
                   <td className="px-6 py-4">
-                    <div className="font-medium text-white">{tenant.name}</div>
+                    <div className="font-medium text-white flex items-center gap-2">
+                      {tenant.name}
+                      {isPreviouslyArchived && (
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20" title={t('admin.warn.archived')}>
+                          <AlertTriangle size={12} /> {t('admin.warn.archived')}
+                        </span>
+                      )}
+                    </div>
                     <div className="text-sm text-slate-500">{tenant.email}</div>
                   </td>
                   <td className="px-6 py-4">
@@ -199,7 +224,61 @@ export const SuperAdminDashboard = () => {
                     </button>
                   </td>
                 </tr>
-              ))}
+              )})}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* History & Archive Timeline */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mt-8">
+        <div className="p-6 border-b border-slate-800 flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Clock className="text-slate-400" />
+            {t('admin.history.title')}
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-slate-950/50 text-slate-400 text-xs uppercase tracking-wider">
+              <tr>
+                <th className={clsx("px-6 py-4 font-semibold", isRtl && "text-right")}>{t('admin.history.date')}</th>
+                <th className={clsx("px-6 py-4 font-semibold", isRtl && "text-right")}>{t('admin.history.email')}</th>
+                <th className={clsx("px-6 py-4 font-semibold", isRtl && "text-right")}>{t('admin.history.action')}</th>
+                <th className={clsx("px-6 py-4 font-semibold", isRtl && "text-right")}>{t('admin.history.reason')}</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-800/50">
+              {history.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="px-6 py-8 text-center text-slate-500">
+                    No history records found.
+                  </td>
+                </tr>
+              ) : (
+                history.map(record => (
+                  <tr key={record.id} className="hover:bg-slate-800/20 transition-colors text-sm">
+                    <td className="px-6 py-4 text-slate-400 whitespace-nowrap">
+                      {record.timestamp?.toDate().toLocaleString() || '-'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-medium text-slate-300">{record.name}</div>
+                      <div className="text-slate-500">{record.email}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={clsx(
+                        "px-2.5 py-1 rounded-md text-[10px] font-bold uppercase",
+                        record.action === 'deleted' ? "bg-rose-500/10 text-rose-400 border border-rose-500/20" : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                      )}>
+                        {record.action}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-400 max-w-md truncate" title={record.reason}>
+                      {record.reason}
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

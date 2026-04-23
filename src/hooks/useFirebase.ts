@@ -147,10 +147,31 @@ export const deleteTenantData = async (tenantId: string, tenantData: Tenant, rea
   }
 };
 
+export const useBackups = (tenantId: string | undefined) => {
+  const [backups, setBackups] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!tenantId) return;
+
+    const q = query(collection(db, 'backups'), where('tenantId', '==', tenantId));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const items: any[] = [];
+      snapshot.forEach((doc) => items.push({ id: doc.id, ...doc.data() }));
+      items.sort((a, b) => b.timestamp?.toMillis() - a.timestamp?.toMillis());
+      setBackups(items);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [tenantId]);
+
+  return { backups, loading };
+};
+
 export const checkDeletionHistory = async (email: string) => {
-  const q = query(collection(db, 'deleted_users_history'), where('email', '==', email));
-  const snapshot = await getDoc(doc(db, 'deleted_users_history', email)); // Note: Using collection query logic in components, keeping this simple.
-  return snapshot.exists();
+  // We'll read the history dynamically in the component directly, this was just a placeholder
+  return false;
 };
 
 export const updateTenantPermissions = async (tenantId: string, updates: Partial<Tenant>) => {

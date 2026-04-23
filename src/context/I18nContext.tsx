@@ -30,6 +30,26 @@ const translations = {
     'nav.config': 'Configuration',
     'nav.oversight': 'Oversight',
     'nav.system': 'System',
+    'nav.backups': 'Backup & Restore',
+
+    // Backups
+    'backup.title': 'Backup & Restore Center',
+    'backup.desc': 'Create snapshots of your inventory and sales data, or restore your workspace to a previous state.',
+    'backup.create': 'Create New Backup',
+    'backup.name': 'Backup Name',
+    'backup.placeholder': 'e.g., Q1 End of Month',
+    'backup.btn.create': 'Create Snapshot',
+    'backup.danger': 'Danger Zone',
+    'backup.danger.desc': 'Permanently wipe all your inventory, sales, and transaction data. This action is irreversible.',
+    'backup.btn.reset': 'Factory Reset Data',
+    'backup.list': 'Available Backups',
+    'backup.table.date': 'Date',
+    'backup.table.name': 'Name',
+    'backup.table.size': 'Size',
+    'backup.table.action': 'Action',
+    'backup.empty': 'No backups found.',
+    'backup.justNow': 'Just now',
+    'backup.action.restore': 'Restore',
 
     // Switcher
     'switch.command': 'Command',
@@ -137,6 +157,12 @@ const translations = {
     'admin.table.actions': 'Actions',
     'admin.table.empty': 'No pending currency requests.',
     'admin.action.approveSync': 'Approve & Sync',
+    'admin.history.title': 'Deletion & Archive History',
+    'admin.history.email': 'Email',
+    'admin.history.reason': 'Reason',
+    'admin.history.action': 'Action',
+    'admin.history.date': 'Date',
+    'admin.warn.archived': 'Warning: Previously Archived',
 
     // Errors mapped safely
     'err.admin.deleteFail': 'Cannot delete this account.',
@@ -162,6 +188,26 @@ const translations = {
     'nav.config': 'التكوين',
     'nav.oversight': 'الإشراف العام',
     'nav.system': 'النظام',
+    'nav.backups': 'النسخ الاحتياطي',
+
+    // Backups
+    'backup.title': 'مركز النسخ الاحتياطي',
+    'backup.desc': 'قم بإنشاء نسخ احتياطية لبياناتك ومخزونك، أو استعد مساحة عملك لحالة سابقة.',
+    'backup.create': 'إنشاء نسخة جديدة',
+    'backup.name': 'اسم النسخة',
+    'backup.placeholder': 'مثال: نهاية الربع الأول',
+    'backup.btn.create': 'أخذ لقطة للبيانات',
+    'backup.danger': 'منطقة الخطر',
+    'backup.danger.desc': 'سيتم مسح كافة بيانات المخزون والمبيعات نهائياً. هذا الإجراء لا يمكن التراجع عنه.',
+    'backup.btn.reset': 'إعادة ضبط المصنع',
+    'backup.list': 'النسخ المتاحة',
+    'backup.table.date': 'التاريخ',
+    'backup.table.name': 'الاسم',
+    'backup.table.size': 'الحجم',
+    'backup.table.action': 'الإجراء',
+    'backup.empty': 'لا توجد نسخ احتياطية.',
+    'backup.justNow': 'الآن',
+    'backup.action.restore': 'استعادة',
 
     // Switcher
     'switch.command': 'مركز القيادة',
@@ -269,6 +315,12 @@ const translations = {
     'admin.table.actions': 'الإجراءات',
     'admin.table.empty': 'لا توجد طلبات عملة معلقة.',
     'admin.action.approveSync': 'موافقة ومزامنة',
+    'admin.history.title': 'سجل الحذف والأرشيف',
+    'admin.history.email': 'البريد الإلكتروني',
+    'admin.history.reason': 'السبب',
+    'admin.history.action': 'الإجراء',
+    'admin.history.date': 'التاريخ',
+    'admin.warn.archived': 'تحذير: حساب مؤرشف سابقاً',
 
     // Errors mapped safely
     'err.admin.deleteFail': 'تعذر حذف هذا الحساب.',

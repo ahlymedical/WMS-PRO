@@ -53,5 +53,26 @@ export interface StockTransaction {
   name: string;
   type: 'in' | 'out';
   quantity: number;
+  stockBefore: number;
+  stockAfter: number;
+  timestamp: any;
+}
+
+export interface Backup {
+  id: string;
+  tenantId: string;
+  name: string;
+  dataPayload: string; // JSON string of collections
+  timestamp: any;
+  sizeBytes: number;
+}
+
+export interface DeletedUserHistory {
+  id?: string;
+  tenantId: string;
+  email: string;
+  name: string;
+  reason: string;
+  action: 'deleted' | 'archived';
   timestamp: any;
 }
