@@ -16,7 +16,11 @@ export const Dashboard = () => {
   // Calculate live stats
   const totalVolume = inventory.reduce((sum, item) => sum + item.stock, 0);
   const lowStockCount = inventory.filter(i => i.stock <= i.minAlert).length;
-  const totalRevenue = sales.reduce((sum, tx) => sum + tx.total, 0);
+  const completedSales = sales.filter(s => s.status !== 'refunded');
+  const totalRevenue = completedSales.reduce((sum, tx) => sum + tx.total, 0);
+  const totalCOGS = completedSales.reduce((sum, tx) => sum + tx.items.reduce((itemSum, item) => itemSum + (item.cost * item.quantity), 0), 0);
+  const grossProfit = totalRevenue - totalCOGS;
+  const margin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
 
   if (!tenant) return <div>Loading Workspace...</div>;
 
@@ -92,6 +96,22 @@ export const Dashboard = () => {
           </div>
         </div>
 
+        {/* Profit Margin Card (Requires Admin) */}
+        <div className="bg-white dark:bg-dark-panel border border-gray-100 dark:border-gray-800 p-6 rounded-2xl shadow-xl shadow-gray-200/40 dark:shadow-none relative overflow-hidden group md:col-span-3">
+          <div className="relative z-10 flex justify-between items-center">
+            <div>
+              <p className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Gross Profit (Admins Only)</p>
+              <h3 className="text-4xl font-black text-gray-900 dark:text-white mb-2">
+                {formatMoney(grossProfit, tenant.currency)}
+              </h3>
+              <p className="text-xs font-semibold text-indigo-500">Margin: {margin.toFixed(2)}%</p>
+            </div>
+            <div className="text-right space-y-1 text-sm font-medium text-gray-500">
+               <p>Total Revenue: {formatMoney(totalRevenue, tenant.currency)}</p>
+               <p>Total COGS: {formatMoney(totalCOGS, tenant.currency)}</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

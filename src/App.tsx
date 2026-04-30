@@ -13,6 +13,8 @@ import { Scanner } from './views/Scanner';
 import { POS } from './views/POS';
 import { MarketIntelligence } from './views/MarketIntelligence';
 import { BackupCenter } from './views/BackupCenter';
+import { Reports } from './views/Reports';
+import { ShiftSummary } from './views/ShiftSummary';
 
 // Placeholder login
 const Login = () => <div className="p-10"><h1>Login View</h1></div>;
@@ -34,6 +36,8 @@ export default function App() {
               <Route path="inventory" element={<Inventory />} />
               <Route path="scanner" element={<Scanner />} />
               <Route path="pos" element={<POS />} />
+              <Route path="shift" element={<ShiftSummary />} />
+              <Route path="reports" element={<Reports />} />
               <Route path="market" element={<MarketIntelligence />} />
               <Route path="settings" element={<AdminSettings />} />
               <Route path="backups" element={<BackupCenter />} />

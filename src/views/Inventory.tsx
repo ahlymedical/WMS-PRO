@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useInventory } from '../hooks/useFirebase';
-import { PackagePlus, Search, Pencil, Trash2, ArrowUpDown, PackageSearch } from 'lucide-react';
+import { PackagePlus, Search, Pencil, Trash2, PackageSearch, UploadCloud, Download } from 'lucide-react';
 import { db } from '../lib/firebase';
-import { doc, deleteDoc } from 'firebase/firestore';
+import { doc, deleteDoc, writeBatch, collection } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 import { useI18n } from '../context/I18nContext';
 import clsx from 'clsx';
@@ -13,6 +13,7 @@ export const Inventory = () => {
   const { inventory } = useInventory(activeWorkspaceId!);
   const { t, isRtl } = useI18n();
   const [search, setSearch] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
 
   const filteredItems = inventory.filter(i =>
     i.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -30,6 +31,81 @@ export const Inventory = () => {
     }
   };
 
+  const handleExportCSV = () => {
+    if (!inventory.length) return;
+    const headers = ['barcode', 'name', 'category', 'supplier', 'cost', 'salePrice', 'stock', 'minAlert'];
+    const csvContent = [
+      headers.join(','),
+      ...inventory.map(item => headers.map(header => JSON.stringify((item as any)[header] || '')).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `inventory_export_${new Date().toISOString().split('T')[0]}.csv`;
+    link.click();
+  };
+
+  const handleImportCSV = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+
+      const batch = writeBatch(db);
+      let count = 0;
+
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+
+        const itemData: any = { tenantId: activeWorkspaceId };
+        headers.forEach((header, index) => {
+          let val: any = values[index];
+          if (['cost', 'salePrice', 'stock', 'minAlert'].includes(header)) {
+             val = Number(val) || 0;
+          }
+          itemData[header] = val;
+        });
+
+        // Skip if no barcode or name
+        if (!itemData.barcode || !itemData.name) continue;
+
+        // Check if barcode already exists to update instead of create duplicates
+        const existingItem = inventory.find(inv => inv.barcode === itemData.barcode);
+        const docRef = existingItem
+          ? doc(db, 'inventory', existingItem.id)
+          : doc(collection(db, 'inventory'));
+
+        batch.set(docRef, itemData, { merge: true });
+        count++;
+
+        if (count >= 450) {
+          await batch.commit();
+          count = 0;
+        }
+      }
+
+      if (count > 0) {
+        await batch.commit();
+      }
+
+      toast.success(t('msg.success'));
+    } catch (err) {
+      console.error(err);
+      toast.error(t('msg.fail'));
+    } finally {
+      setIsImporting(false);
+      e.target.value = ''; // Reset input
+    }
+  };
+
+  if (!tenant) return null;
+
   return (
     <div className="space-y-8 animate-fade-in max-w-7xl mx-auto">
 
@@ -37,9 +113,20 @@ export const Inventory = () => {
         <div>
           <h1 className="text-3xl font-black tracking-tight text-gray-900 dark:text-white">{t('nav.inventory')}</h1>
         </div>
-        <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center gap-2">
-          <PackagePlus size={20} /> {t('inventory.add')}
-        </button>
+        <div className="flex gap-2 w-full md:w-auto">
+          <label className="cursor-pointer px-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 flex-1 md:flex-none">
+            <UploadCloud size={18} />
+            <span className="hidden sm:inline">Import CSV</span>
+            <input type="file" accept=".csv" className="hidden" onChange={handleImportCSV} disabled={isImporting} />
+          </label>
+          <button onClick={handleExportCSV} className="px-4 py-3 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition-colors flex items-center justify-center gap-2 flex-1 md:flex-none">
+            <Download size={18} />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
+          <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all flex items-center justify-center gap-2 flex-1 md:flex-none">
+            <PackagePlus size={20} /> {t('inventory.add')}
+          </button>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-dark-panel border border-gray-100 dark:border-gray-800 rounded-2xl shadow-xl shadow-gray-200/40 dark:shadow-none overflow-hidden">

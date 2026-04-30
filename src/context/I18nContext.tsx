@@ -122,6 +122,13 @@ const translations = {
     'msg.success': 'Operation completed successfully.',
     'msg.fail': 'Failed to execute operation.',
 
+    // PinAuth
+    'auth.pin.title': 'Supervisor Authorization Required',
+    'auth.pin.invalidLength': 'PIN must be exactly 6 digits.',
+    'auth.pin.invalid': 'Invalid PIN or insufficient privileges.',
+    'auth.pin.success': 'Authorization granted.',
+    'auth.pin.verify': 'Verify',
+
     // Brand & About
     'brand.about': 'About Us',
     'brand.developer': 'Developer Credit',
@@ -279,6 +286,13 @@ const translations = {
     'err.permission': 'لا تملك صلاحية تنفيذ هذا الإجراء.',
     'msg.success': 'تم تنفيذ العملية بنجاح.',
     'msg.fail': 'تعذر تنفيذ العملية.',
+
+    // PinAuth
+    'auth.pin.title': 'مطلوب إذن مشرف',
+    'auth.pin.invalidLength': 'يجب أن يتكون رمز المرور من 6 أرقام.',
+    'auth.pin.invalid': 'رمز المرور غير صحيح أو لا تملك الصلاحية الكافية.',
+    'auth.pin.success': 'تم منح الإذن بنجاح.',
+    'auth.pin.verify': 'تحقق',
 
     // Brand & About
     'brand.about': 'معلومات عنا',

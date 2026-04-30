@@ -12,31 +12,63 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == tenantId;
     }
 
+    // Function to check if user is an employee of a tenant
+    function getEmployeeData() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+    }
+
+    function isEmployeeOf(tenantId) {
+      return request.auth != null && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getEmployeeData().tenantId == tenantId;
+    }
+
+    function isAtLeastManager(tenantId) {
+      let role = getEmployeeData().role;
+      return isEmployeeOf(tenantId) && (role == 'manager' || role == 'admin');
+    }
+
+    function isAtLeastAdmin(tenantId) {
+      let role = getEmployeeData().role;
+      return isEmployeeOf(tenantId) && role == 'admin';
+    }
+
+    match /users/{userId} {
+      // Employees can read their own profile. Tenant owners can read/write their employees.
+      allow read: if isSuperAdmin() || request.auth.uid == userId || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
+      allow write: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+    }
+
     match /tenants/{tenantId} {
-      allow read: if isSuperAdmin() || isTenantOwner(tenantId);
+      // Employees can read their tenant info. Only Owner/SuperAdmin can update.
+      allow read: if isSuperAdmin() || isTenantOwner(tenantId) || isEmployeeOf(tenantId);
       allow create: if isSuperAdmin() || isTenantOwner(tenantId);
       allow update: if isSuperAdmin() || isTenantOwner(tenantId);
       allow delete: if isSuperAdmin();
     }
 
-    // Allow tenant owners to read/write their own inventory
+    // Inventory: Cashiers can read and update (stock deductions), but only managers/admins/owners can create or delete.
     match /inventory/{docId} {
-      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
-      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+      allow read: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isEmployeeOf(resource.data.tenantId)));
+      allow update: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isEmployeeOf(resource.data.tenantId)));
+      allow delete: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isAtLeastManager(resource.data.tenantId)));
+      allow create: if isSuperAdmin() || (request.auth != null && (request.resource.data.tenantId == request.auth.uid || isAtLeastManager(request.resource.data.tenantId)));
     }
 
-    // Allow tenant owners to read/write their own sales
+    // Sales: Cashiers can read and create sales. Only managers can update/delete (e.g. refunds or corrections).
     match /sales/{docId} {
-      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
-      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+      allow read: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isEmployeeOf(resource.data.tenantId)));
+      allow create: if isSuperAdmin() || (request.auth != null && (request.resource.data.tenantId == request.auth.uid || isEmployeeOf(request.resource.data.tenantId)));
+      allow update, delete: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isAtLeastManager(resource.data.tenantId)));
     }
 
+    // Stock Transactions: Same as sales, everyone can record, only managers can alter history.
     match /stock_transactions/{docId} {
-      allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
-      allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
+      allow read: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isEmployeeOf(resource.data.tenantId)));
+      allow create: if isSuperAdmin() || (request.auth != null && (request.resource.data.tenantId == request.auth.uid || isEmployeeOf(request.resource.data.tenantId)));
+      allow update, delete: if isSuperAdmin() || (request.auth != null && resource != null && (resource.data.tenantId == request.auth.uid || isAtLeastManager(resource.data.tenantId)));
     }
 
     match /backups/{docId} {
+      // Only Tenant Owner or Super Admin can manage backups
       allow read, update, delete: if isSuperAdmin() || (request.auth != null && resource != null && resource.data.tenantId == request.auth.uid);
       allow create: if isSuperAdmin() || (request.auth != null && request.resource.data.tenantId == request.auth.uid);
     }

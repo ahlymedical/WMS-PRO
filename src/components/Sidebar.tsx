@@ -107,6 +107,7 @@ export const Sidebar = () => {
 
             <p className={clsx("text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-3 mt-6", isRtl ? "mr-2" : "ml-2")}>{t('nav.retail')}</p>
             <NavItem to="/app/pos" icon={<Calculator size={20}/>} label={t('nav.pos')} />
+            <NavItem to="/app/shift" icon={<Calculator size={20}/>} label="Z-Report (Shift)" />
             <NavItem to="/app/reports" icon={<FileBarChart size={20}/>} label={t('nav.reports')} />
             <NavItem to="/app/market" icon={<TrendingUp size={20}/>} label={t('nav.market')} />
 
